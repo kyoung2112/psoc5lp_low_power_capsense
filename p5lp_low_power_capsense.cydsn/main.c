@@ -21,7 +21,9 @@
 
 #include <project.h>
 
-#define PERMANENT_SLEEP 0u
+#define MEASURE_DEEPSLEEP_CURRENT 	0u
+#define MEASURE_ACTIVE_CURRENT		0u
+#define MEASURE_SCAN_CURRENT		0u
 
 /* Calibration target for CapSense */
 #define CALIBRATION_TARGET_DUTY_CYCLE 			(83u)	
@@ -76,53 +78,70 @@ int main()
     
     while(1u)
     {
-        /* Update all baselines */
-        CapSense_UpdateEnabledBaselines();
         
    		/* Start scanning all enabled sensors */
     	CapSense_ScanEnabledWidgets();
+		
+		#if !(MEASURE_SCAN_CURRENT)			/* If we are measuring scan current  
+											* 	skip the firmware */
+			
+		/* Update all baselines (using previous scan data) */
+        CapSense_UpdateEnabledBaselines();
+		
+		/* Display button state from previous scan */
+		if (CapSense_CheckIsAnyWidgetActive()) 
+		{
+			LED_Write(1u);
+		}
+		else
+		{
+			LED_Write(0u);
+		}
     
+		#endif
+		
         /* Wait for scanning to complete */
 		while(CapSense_IsBusy() != 0)
 		{
-			 /* go into alt active mode(stall CPU), wake it back up on interrupt */
+			#if !(MEASURE_ACTIVE_CURRENT)	/* If we are measuring active current, don't
+											*	sleep CPU */
+			 /* go into alt active mode(sleep CPU), wake it back up on interrupt */
 	        CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_INTERRUPT);
+			#endif
 		}
-
-		 /* Display BUTTON0 state */
-	if (CapSense_CheckIsAnyWidgetActive()) 
-	{
-		LED_Write(1u);
-	}
-	else
-	{
-		LED_Write(0u);
-	}
 	
-	CapSense_Sleep();
+		#if !(MEASURE_SCAN_CURRENT)			/* If we are measuring scan current  
+											* 	immediately start a new scan and
+											* 	don't sleep. */
 	
-	#if !(PERMANENT_SLEEP)
-	/*******************************************************************
-    * Switch to the Sleep Mode for PSoC5 devices:
-    *  - PM_SLEEP_TIME_NONE: wakeup time is defined by Sleep Timer
-    *  - PM_SLEEP_SRC_NONE : all wakeup sources is allowed
-    *******************************************************************/
-	Debug_Out_Write(0u);
-    CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_CTW);
-	#else
-	CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_NONE); /* Sleep permanently for current testing */
-	while(1);	//If it hits here (high current), then sleep was not successful
-	#endif
-	
-	/***************************************************************************
-    * This function must always be called (when the Sleep Timer's interrupt
-    * is disabled or enabled) after wake up to clear the ctw_int status bit.
-    * It is required to call SleepTimer_GetStatus() within 1 ms (1 clock cycle
-    * of the ILO) after CTW event occurred.
-    ***************************************************************************/
-    //SleepTimer_GetStatus();
-	Debug_Out_Write(1u);
-	CapSense_Wakeup();
+		CapSense_Sleep();
+	 
+		#if !(MEASURE_ACTIVE_CURRENT)	/* Don't sleep if measuring active current */
+		#if !(MEASURE_DEEPSLEEP_CURRENT )
+		/*******************************************************************
+	    * Switch to the Sleep Mode for PSoC5 devices:
+	    *  - PM_SLEEP_TIME_NONE: wakeup time is defined by Sleep Timer
+	    *  - PM_SLEEP_SRC_NONE : all wakeup sources is allowed
+	    *******************************************************************/
+		Debug_Out_Write(0u);
+	    CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_CTW);
+		#else
+		/* Sleep permanently for sleep current measurement */
+		CyGlobalIntDisable;	/* No wakey */
+		CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_NONE); /* Sleep permanently for current testing */
+		while(1);	//If it hits here (high current), then sleep was not successful
+		#endif
+		#endif
+		/***************************************************************************
+	    * This function must always be called (when the Sleep Timer's interrupt
+	    * is disabled or enabled) after wake up to clear the ctw_int status bit.
+	    * It is required to call SleepTimer_GetStatus() within 1 ms (1 clock cycle
+	    * of the ILO) after CTW event occurred.
+	    ***************************************************************************/
+	    //SleepTimer_GetStatus();
+		Debug_Out_Write(1u);
+		CapSense_Wakeup();
+		#endif
 	}
    
 }
