@@ -527,6 +527,7 @@ void CapSense_Stop(void)
     #endif  /* CapSense_DESIGN_TYPE */
     
     /* Clear all sensors */
+	/* KLY - The sensors will stay enabled during sleep to save time */
     //CapSense_ClearSensors();
     
     /* Disable Prescaler */
@@ -1437,6 +1438,8 @@ void CapSense_PreScan(uint8 sensor) CYREENTRANT
             #endif  /* (CapSense_VREF_VDAC != CapSense_VREF_OPTIONS) */
 
             /* Enable Sensor */
+			/* KLY - The sensors will stay enabled to save time. NOTE: Need to 
+			manually enable before scanning the first sensor! */
             //CapSense_EnableScanSlot(sensor);
             
         #elif (CapSense_CURRENT_SOURCE == CapSense_IDAC_SINK)
@@ -1591,7 +1594,9 @@ void CapSense_PreScan(uint8 sensor) CYREENTRANT
         #endif  /* (CapSense_IMPLEMENTATION == CapSense_MEASURE_IMPLEMENTATION_FF) */
         
         /* Disable Sensor */
-       //CapSense_DisableScanSlot(sensor);
+		/* KLY - The sensors will stay enabled to save time. NOTE: Need to 
+			manually enabled before scanning the first sensor! */
+        //CapSense_DisableScanSlot(sensor);
         
         #if(CapSense_CURRENT_SOURCE)
             /* Turn off IDAC */

@@ -52,6 +52,7 @@ void CapSense_SaveConfig(void)
     CapSense_backup.ctrlReg = CapSense_CONTROL_REG;
 
     /* Clear all sensors */
+	/* KLY removed - sensors will stay enabled during sleep to save time */
     //CapSense_ClearSensors();
     
     /* The pins disable is customer concern: Cmod and Rb */

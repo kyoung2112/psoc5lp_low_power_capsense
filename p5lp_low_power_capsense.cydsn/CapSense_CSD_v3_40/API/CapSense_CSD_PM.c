@@ -52,7 +52,8 @@ void `$INSTANCE_NAME`_SaveConfig(void) `=ReentrantKeil($INSTANCE_NAME . "_SaveCo
     `$INSTANCE_NAME`_backup.ctrlReg = `$INSTANCE_NAME`_CONTROL_REG;
 
     /* Clear all sensors */
-    `$INSTANCE_NAME`_ClearSensors();
+	/* KLY removed - sensors will stay enabled during sleep to save time */
+    //`$INSTANCE_NAME`_ClearSensors();
     
     /* The pins disable is customer concern: Cmod and Rb */
 }

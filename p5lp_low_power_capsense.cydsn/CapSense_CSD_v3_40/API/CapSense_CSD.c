@@ -484,7 +484,8 @@ void `$INSTANCE_NAME`_Stop(void) `=ReentrantKeil($INSTANCE_NAME . "_Stop")`
     #endif  /* `$INSTANCE_NAME`_DESIGN_TYPE */
     
     /* Clear all sensors */
-    `$INSTANCE_NAME`_ClearSensors();
+	/* KLY - The sensors will stay enabled during sleep to save time */
+    //`$INSTANCE_NAME`_ClearSensors();
     
     /* Disable Prescaler */
     #if (`$INSTANCE_NAME`_PRESCALER_OPTIONS == `$INSTANCE_NAME`_PRESCALER_UDB)
@@ -1394,7 +1395,9 @@ void `$INSTANCE_NAME`_PreScan(uint8 sensor) CYREENTRANT
             #endif  /* (`$INSTANCE_NAME`_VREF_VDAC != `$INSTANCE_NAME`_VREF_OPTIONS) */
 
             /* Enable Sensor */
-            `$INSTANCE_NAME`_EnableScanSlot(sensor);
+			/* KLY - The sensors will stay enabled to save time. NOTE: Need to 
+			manually enable before scanning the first sensor! */
+            //`$INSTANCE_NAME`_EnableScanSlot(sensor);
             
         #elif (`$INSTANCE_NAME`_CURRENT_SOURCE == `$INSTANCE_NAME`_IDAC_SINK)
             /* Connect IDAC */
@@ -1548,7 +1551,9 @@ void `$INSTANCE_NAME`_PreScan(uint8 sensor) CYREENTRANT
         #endif  /* (`$INSTANCE_NAME`_IMPLEMENTATION == `$INSTANCE_NAME`_MEASURE_IMPLEMENTATION_FF) */
         
         /* Disable Sensor */
-        `$INSTANCE_NAME`_DisableScanSlot(sensor);
+		/* KLY - The sensors will stay enabled to save time. NOTE: Need to 
+			manually enabled before scanning the first sensor! */
+        //`$INSTANCE_NAME`_DisableScanSlot(sensor);
         
         #if(`$INSTANCE_NAME`_CURRENT_SOURCE)
             /* Turn off IDAC */

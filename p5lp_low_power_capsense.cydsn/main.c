@@ -61,7 +61,10 @@ int main()
 	/* Start CapSense */
     CapSense_Start();
 	
+	/* Enable both sensors and leave them enabled to save time waking and sleeping.
+	* Requires custom modification of CapSense component API */
 	CapSense_EnableSensor(CapSense_SENSOR_BUTTON1__BTN);
+	CapSense_EnableSensor(CapSense_SENSOR_BUTTON0__BTN);
 	
 	/* Calibrate IDAC on each sensor */
 	Calibrate_IDAC(CapSense_SENSOR_BUTTON0__BTN,CALIBRATION_TARGET_DUTY_CYCLE );
@@ -71,8 +74,7 @@ int main()
     
     while(1u)
     {
-        CapSense_EnableSensor(CapSense_SENSOR_BUTTON1__BTN);
-		
+
    		/* Scan sensor 0 (with ganged sensor 1) */
     	CapSense_ScanSensor(CapSense_SENSOR_BUTTON0__BTN);
 		
@@ -102,10 +104,10 @@ int main()
 		{
 			#if !(MEASURE_ACTIVE_CURRENT)	/* If we are measuring active current, don't
 											*	sleep CPU */
-			Debug_Out_Write(1u);
+			//Debug_Out_Write(1u);
 			 /* go into alt active mode(sleep CPU), wake it back up on interrupt */
 	        CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_INTERRUPT);
-			Debug_Out_Write(0u);
+			//Debug_Out_Write(0u);
 			#endif
 		}
 	
@@ -122,7 +124,7 @@ int main()
 	    *  - PM_SLEEP_TIME_NONE: wakeup time is defined by Sleep Timer
 	    *  - PM_SLEEP_SRC_NONE : all wakeup sources is allowed
 	    *******************************************************************/
-		//Debug_Out_Write(0u);
+		Debug_Out_Write(0u);
 	    CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_CTW);
 		#else
 		/* Sleep permanently for sleep current measurement */
@@ -131,7 +133,7 @@ int main()
 		while(1);	//If it hits here (high current), then sleep was not successful
 		#endif
 		#endif
-		//Debug_Out_Write(1u);
+		Debug_Out_Write(1u);
 		CapSense_Wakeup();
 		#endif
 	}
