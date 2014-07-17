@@ -61,17 +61,20 @@ int main()
 	/* Start CapSense */
     CapSense_Start();
 	
+	CapSense_EnableSensor(CapSense_SENSOR_BUTTON1__BTN);
+	
 	/* Calibrate IDAC on each sensor */
-	CalibrateAllSensors();
+	Calibrate_IDAC(CapSense_SENSOR_BUTTON0__BTN,CALIBRATION_TARGET_DUTY_CYCLE );
 	
     /* Initialize CapSense baselines */ 
     CapSense_InitializeAllBaselines();
     
     while(1u)
     {
-        
-   		/* Start scanning all enabled sensors */
-    	CapSense_ScanEnabledWidgets();
+        CapSense_EnableSensor(CapSense_SENSOR_BUTTON1__BTN);
+		
+   		/* Scan sensor 0 (with ganged sensor 1) */
+    	CapSense_ScanSensor(CapSense_SENSOR_BUTTON0__BTN);
 		
 		#if !(MEASURE_SCAN_CURRENT)			/* If we are measuring scan current  
 											* 	skip the firmware */
@@ -80,10 +83,10 @@ int main()
 		*	save power. The only hit is the latency of one wake cycle */
 			
 		/* Update all baselines using previous scan data */
-        CapSense_UpdateEnabledBaselines();
+        CapSense_UpdateSensorBaseline(CapSense_SENSOR_BUTTON0__BTN);
 		
 		/* Display button state from previous scan */
-		if (CapSense_CheckIsAnyWidgetActive()) 
+		if (CapSense_CheckIsSensorActive(CapSense_SENSOR_BUTTON0__BTN)) 
 		{
 			LED_Write(1u);
 		}
@@ -99,8 +102,10 @@ int main()
 		{
 			#if !(MEASURE_ACTIVE_CURRENT)	/* If we are measuring active current, don't
 											*	sleep CPU */
+			Debug_Out_Write(1u);
 			 /* go into alt active mode(sleep CPU), wake it back up on interrupt */
 	        CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_INTERRUPT);
+			Debug_Out_Write(0u);
 			#endif
 		}
 	
@@ -117,7 +122,7 @@ int main()
 	    *  - PM_SLEEP_TIME_NONE: wakeup time is defined by Sleep Timer
 	    *  - PM_SLEEP_SRC_NONE : all wakeup sources is allowed
 	    *******************************************************************/
-		Debug_Out_Write(0u);
+		//Debug_Out_Write(0u);
 	    CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_CTW);
 		#else
 		/* Sleep permanently for sleep current measurement */
@@ -126,7 +131,7 @@ int main()
 		while(1);	//If it hits here (high current), then sleep was not successful
 		#endif
 		#endif
-		Debug_Out_Write(1u);
+		//Debug_Out_Write(1u);
 		CapSense_Wakeup();
 		#endif
 	}

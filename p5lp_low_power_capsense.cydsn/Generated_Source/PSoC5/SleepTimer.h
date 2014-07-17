@@ -77,7 +77,7 @@ uint8 SleepTimer_GetStatus(void) ;
 ***************************************/
 
 #define SleepTimer_ENABLE_INTERRUPT   (1u)
-#define SleepTimer_INTERVAL           (4u)
+#define SleepTimer_INTERVAL           (3u)
 
 
 /**************************************
