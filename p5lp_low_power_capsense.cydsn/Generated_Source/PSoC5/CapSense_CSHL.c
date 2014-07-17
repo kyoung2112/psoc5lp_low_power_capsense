@@ -58,7 +58,7 @@ uint8 CapSense_hysteresis[] = {
 };
 
 uint8 CapSense_debounce[] = {
-    1u, 1u, 
+    5u, 5u, 
 };
 
 uint8 CapSense_debounceCounter[] = {

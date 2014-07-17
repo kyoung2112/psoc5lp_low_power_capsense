@@ -48,14 +48,6 @@ uint8 * SMS_LIB_prescaler = CapSense_analogSwitchDivider;
 uint16 * SMS_LIB_SensorRaw = CapSense_sensorRaw;
 uint16 * SMS_LIB_SensorBaseline = CapSense_sensorBaseline;
 
-const uint8 CYCODE SMS_LIB_SensorSensitivity[] = {
-    2, 2, 
-};
-
-
-const uint8 CYCODE SMS_LIB_PrescalerTbl[] = {
-    1u, 1u, 1u, 1u, 1u, 1u, 2u, 2u, 2u, 2u, 2u, 3u, 3u, 3u, 3u, 3u, 3u, 4u, 4u, 4u, 4u, 4u, 4u, 5u, 5u, 5u, 5u, 5u, 5u, 6u, 6u, 6u, 
-};
 
 
 
@@ -71,8 +63,8 @@ uint8 SMS_LIB_Table8[CapSense_END_OF_WIDGETS_INDEX];
 uint8 SMS_LIB_Table9[CapSense_END_OF_WIDGETS_INDEX];
 uint8 SMS_LIB_Table10[CapSense_END_OF_WIDGETS_INDEX];
 
-uint8 SMS_LIB_Var1 = (5u);
-uint16 SMS_LIB_Var2 = (10738u);
+uint8 SMS_LIB_Var1 = ();
+uint16 SMS_LIB_Var2 = ();
 
 uint8 SMS_LIB_TotalSnsCnt = CapSense_TOTAL_SENSOR_COUNT;
 uint8 SMS_LIB_TotalScanSlCnt = CapSense_TOTAL_SCANSLOT_COUNT;

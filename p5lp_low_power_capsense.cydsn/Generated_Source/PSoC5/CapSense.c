@@ -72,7 +72,10 @@ uint8 CapSense_widgetResolution[] = {
     CapSense_PWM_RESOLUTION_10_BITS,
 };
 
-uint8 CapSense_analogSwitchDivider[CapSense_TOTAL_SCANSLOT_COUNT];
+uint8 CapSense_analogSwitchDivider[CapSense_TOTAL_SCANSLOT_COUNT] = {
+    11u, 11u, 
+};
+
 const uint8 CYCODE CapSense_widgetNumber[] = {
     0u, /* Button0__BTN */
     1u, /* Button1__BTN */

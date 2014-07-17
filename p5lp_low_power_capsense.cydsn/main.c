@@ -23,31 +23,12 @@
 
 #define PERMANENT_SLEEP 0u
 
+/* Calibration target for CapSense */
+#define CALIBRATION_TARGET_DUTY_CYCLE 			(83u)	
 
-/*******************************************************************************
-* Function Name: WakeupIsr
-********************************************************************************
-* Summary:
-*  The wakeup interrupt service routine.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  None
-*
-*******************************************************************************/
-CY_ISR(WakeupIsr)
-{
-    /***************************************************************************
-    * This function must always be called (when the Sleep Timer's interrupt
-    * is disabled or enabled) after wake up to clear the ctw_int status bit.
-    * It is required to call SleepTimer_GetStatus() within 1 ms (1 clock cycle
-    * of the ILO) after CTW event occurred.
-    ***************************************************************************/
-    SleepTimer_GetStatus();
-}
-
+void Calibrate_IDAC(uint8 SensorIndex, uint8 DutyCycle);
+CY_ISR(WakeupIsr);
+void CalibrateAllSensors(void);
 
 
 /*******************************************************************************
@@ -87,6 +68,8 @@ int main()
 
 	/* Start CapSense */
     CapSense_Start();
+	
+	CalibrateAllSensors();
 	
     /* Initialize baselines */ 
     CapSense_InitializeAllBaselines();
@@ -143,5 +126,127 @@ int main()
 	}
    
 }
+
+/* This function calibrates the IDAC value(s) for a specific sensor. The scan IDAC
+value is written to the array of the CapSense component. The compensation IDAC value
+if required is returned by the function. */
+
+void Calibrate_IDAC(uint8 SensorIndex, uint8 DutyCycle)
+{
+	extern uint8 CapSense_idacSettings[];
+	extern uint8 CapSense_widgetResolution[];
+	extern uint16 CapSense_sensorRaw[];
+	extern const uint8 CYCODE CapSense_widgetNumber[];
+	uint8 Mask;
+	uint8 idac;
+	uint16 temp_raw;
+	uint32 CalTarget;
+
+
+	switch(CapSense_widgetResolution[CapSense_widgetNumber[SensorIndex]])
+	{
+		case CapSense_PWM_RESOLUTION_8_BITS:
+			CalTarget = 0x000000FF;
+			break;
+		case CapSense_PWM_RESOLUTION_9_BITS:
+			CalTarget = 0x000001FF;
+			break;
+		case CapSense_PWM_RESOLUTION_10_BITS:
+			CalTarget = 0x000003FF;
+			break;
+		case CapSense_PWM_RESOLUTION_11_BITS:
+			CalTarget = 0x000007FF;
+			break;
+		case CapSense_PWM_RESOLUTION_12_BITS:
+			CalTarget = 0x00000FFF;
+			break;
+		case CapSense_PWM_RESOLUTION_13_BITS:
+			CalTarget = 0x00001FFF;
+			break;
+		case CapSense_PWM_RESOLUTION_14_BITS:
+			CalTarget = 0x00003FFF;
+			break;
+		case CapSense_PWM_RESOLUTION_15_BITS:
+			CalTarget = 0x00007FFF;
+			break;
+		case CapSense_PWM_RESOLUTION_16_BITS:
+			CalTarget = 0x0000FFFF;
+			break;
+		default:
+			CalTarget = 0x000000FF;
+			break;
+	}
+
+	CalTarget = (CalTarget * DutyCycle) / 100;
+	
+	/* Find a scan IDAC value closest to the target. This routine iterates through the
+	8-bit scan IDAC value by setting each bit, scanning, and testing the output. If less
+	than the target the bit is cleared before setting the next lower bit.  */
+	
+	Mask = 0x80; //Start with the MSB
+	idac = 0xff;
+	
+	while(Mask)
+	{
+		CapSense_idacSettings[SensorIndex] = idac;	//Set the idac value	
+		
+		CapSense_ScanSensor(SensorIndex);
+        
+		while(CapSense_IsBusy() != 0);
+		
+		temp_raw = CapSense_sensorRaw[SensorIndex];
+		
+		if (temp_raw > CalTarget )
+		{
+			idac += Mask;
+		}
+		else if (temp_raw < CalTarget)
+		{
+			idac -= Mask;
+		}
+		else
+		{
+			break;
+		}
+		
+		Mask >>= 1; //Move to next bit to the right
+	}
+	
+}
+
+/*******************************************************************************
+* Function Name: WakeupIsr
+********************************************************************************
+* Summary:
+*  The wakeup interrupt service routine.
+*
+* Parameters:
+*  None
+*
+* Return:
+*  None
+*
+*******************************************************************************/
+CY_ISR(WakeupIsr)
+{
+    /***************************************************************************
+    * This function must always be called (when the Sleep Timer's interrupt
+    * is disabled or enabled) after wake up to clear the ctw_int status bit.
+    * It is required to call SleepTimer_GetStatus() within 1 ms (1 clock cycle
+    * of the ILO) after CTW event occurred.
+    ***************************************************************************/
+    SleepTimer_GetStatus();
+}
+
+void CalibrateAllSensors(void)
+{
+	uint8 i;
+	for(i = 0u; i < CapSense_TOTAL_SENSOR_COUNT; i++)
+    {
+        Calibrate_IDAC(i,CALIBRATION_TARGET_DUTY_CYCLE);
+    }
+}
+
+
 
 /* [] END OF FILE */

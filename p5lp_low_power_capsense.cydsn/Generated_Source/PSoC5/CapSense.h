@@ -56,14 +56,14 @@
 #define CapSense_PRESCALER_OPTIONS          (1u)
 #define CapSense_MULTIPLE_PRESCALER_ENABLED (1u)
 
-#define CapSense_PRS_OPTIONS                (2u)
-#define CapSense_SCANSPEED_VALUE            (7u)
+#define CapSense_PRS_OPTIONS                (0u)
+#define CapSense_SCANSPEED_VALUE            (1u)
 
 #define CapSense_VREF_OPTIONS               (0u)
 
 #define CapSense_WATER_PROOF                (0u)
 
-#define CapSense_TUNING_METHOD              (2u)
+#define CapSense_TUNING_METHOD              (1u)
 #define CapSense_TUNER_API_GENERATE         (0u)
 
 #define CapSense_IMPLEMENTATION_CH0         (1u)
