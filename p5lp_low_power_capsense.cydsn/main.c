@@ -1,15 +1,9 @@
 /*******************************************************************************
 * File Name: main.c
 *
-* Version: 1.00
-*
-* Description:
-*  The project explains the usage of CapSense CSD component. The 2 buttons and
-*  linear sliders are used as sensing elements. LED displays buttons active 
-*  state and slider position is shown on LCD.
 *
 ********************************************************************************
-* Copyright 2012, Cypress Semiconductor Corporation. All rights reserved.
+* Copyright 2014, Cypress Semiconductor Corporation. All rights reserved.
 * This software is owned by Cypress Semiconductor Corporation and is protected
 * by and subject to worldwide patent and copyright laws and treaties.
 * Therefore, you may use this software only as provided in the license agreement
@@ -28,6 +22,7 @@
 /* Calibration target for CapSense */
 #define CALIBRATION_TARGET_DUTY_CYCLE 			(83u)	
 
+/* Function prototypes */
 void Calibrate_IDAC(uint8 SensorIndex, uint8 DutyCycle);
 CY_ISR(WakeupIsr);
 void CalibrateAllSensors(void);
@@ -40,7 +35,8 @@ void CalibrateAllSensors(void);
 *  Main function performs following functions:
 *   1. Enable global interrupts.
 *   2. Initialize CapSense CSD and Start the sensor scanning loop.
-*   3. Process scanning results and display it on LCD/LED.
+*   3. Process scanning results and display it on LED.
+*	4. Handle power management.
 *
 * Parameters:
 *  None
@@ -56,24 +52,19 @@ int main()
     /* Enable global interrupts */
     CyGlobalIntEnable;
 	
-	/* Start components */
+	/* Enable wakeup interrupt */
     isr_StartEx(WakeupIsr);
     
     /* Start SleepTimer's operation with the customizer's settings */
     SleepTimer_Start();
 
-    /* Optional section used for demonstration purposes */
-//    SleepTimer_Stop();              /* Stop Sleep Timer's operation         */
-//    SleepTimer_EnableInt();         /* Enable interrupts. Not required.     */
-//    SleepTimer_SetInterval(SleepTimer__CTW_4_MS);    /* Set new interval    */
-//    SleepTimer_Start();             /* Start with the new settings          */
-
 	/* Start CapSense */
     CapSense_Start();
 	
+	/* Calibrate IDAC on each sensor */
 	CalibrateAllSensors();
 	
-    /* Initialize baselines */ 
+    /* Initialize CapSense baselines */ 
     CapSense_InitializeAllBaselines();
     
     while(1u)
@@ -85,7 +76,10 @@ int main()
 		#if !(MEASURE_SCAN_CURRENT)			/* If we are measuring scan current  
 											* 	skip the firmware */
 			
-		/* Update all baselines (using previous scan data) */
+		/* Note - the capsense processing is done using the previous scan data to 
+		*	save power. The only hit is the latency of one wake cycle */
+			
+		/* Update all baselines using previous scan data */
         CapSense_UpdateEnabledBaselines();
 		
 		/* Display button state from previous scan */
@@ -132,13 +126,6 @@ int main()
 		while(1);	//If it hits here (high current), then sleep was not successful
 		#endif
 		#endif
-		/***************************************************************************
-	    * This function must always be called (when the Sleep Timer's interrupt
-	    * is disabled or enabled) after wake up to clear the ctw_int status bit.
-	    * It is required to call SleepTimer_GetStatus() within 1 ms (1 clock cycle
-	    * of the ILO) after CTW event occurred.
-	    ***************************************************************************/
-	    //SleepTimer_GetStatus();
 		Debug_Out_Write(1u);
 		CapSense_Wakeup();
 		#endif
