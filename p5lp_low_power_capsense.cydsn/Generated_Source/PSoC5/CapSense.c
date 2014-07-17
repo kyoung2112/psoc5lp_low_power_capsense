@@ -527,7 +527,7 @@ void CapSense_Stop(void)
     #endif  /* CapSense_DESIGN_TYPE */
     
     /* Clear all sensors */
-    CapSense_ClearSensors();
+    //CapSense_ClearSensors();
     
     /* Disable Prescaler */
     #if (CapSense_PRESCALER_OPTIONS == CapSense_PRESCALER_UDB)
@@ -1437,7 +1437,7 @@ void CapSense_PreScan(uint8 sensor) CYREENTRANT
             #endif  /* (CapSense_VREF_VDAC != CapSense_VREF_OPTIONS) */
 
             /* Enable Sensor */
-            CapSense_EnableScanSlot(sensor);
+            //CapSense_EnableScanSlot(sensor);
             
         #elif (CapSense_CURRENT_SOURCE == CapSense_IDAC_SINK)
             /* Connect IDAC */
@@ -1591,7 +1591,7 @@ void CapSense_PreScan(uint8 sensor) CYREENTRANT
         #endif  /* (CapSense_IMPLEMENTATION == CapSense_MEASURE_IMPLEMENTATION_FF) */
         
         /* Disable Sensor */
-        CapSense_DisableScanSlot(sensor);
+       //CapSense_DisableScanSlot(sensor);
         
         #if(CapSense_CURRENT_SOURCE)
             /* Turn off IDAC */
