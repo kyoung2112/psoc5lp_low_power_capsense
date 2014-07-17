@@ -251,15 +251,4 @@ CY_ISR(WakeupIsr)
     SleepTimer_GetStatus();
 }
 
-void CalibrateAllSensors(void)
-{
-	uint8 i;
-	for(i = 0u; i < CapSense_TOTAL_SENSOR_COUNT; i++)
-    {
-        Calibrate_IDAC(i,CALIBRATION_TARGET_DUTY_CYCLE);
-    }
-}
-
-
-
 /* [] END OF FILE */
