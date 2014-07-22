@@ -52,6 +52,9 @@ int main()
     /* Enable global interrupts */
     CyGlobalIntEnable;
 	
+	/* Delay to make sure the device has stabilized enough for sleep */
+	CyDelay(5);
+	
 	/* Enable wakeup interrupt */
     isr_StartEx(WakeupIsr);
     
